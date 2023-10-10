@@ -22,7 +22,7 @@ model User {
   province  String?
   country   String?
   zipCode   String?
-  isAdmin   Boolean
+  isAdmin   Boolean @default(false)
   orders    Order[]
   cart      Cart[]
 }
