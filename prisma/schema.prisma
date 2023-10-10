@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String  @unique
+  password  String
+  mobile    String? @unique
+  adddress  String?
+  city      String?
+  province  String?
+  country   String?
+  zipCode   String?
+  isAdmin   Boolean
+  orders    Order[]
+  cart      Cart[]
+}
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  totalPrice    Int
+  paymentStatus PaymentStatus
+  paymentDate   DateTime?
+  qrImageUrl    String
+  slipImageUrl  String?
+  userId        Int
+  User          User?         @relation(fields: [userId], references: [id])
+  orderItems    OrderItem[]
+}
+
+model OrderItem {
+  id         Int     @id @default(autoincrement())
+  quantity   Int
+  totalPrice Int
+  orderId    Int
+  Order      Order   @relation(fields: [orderId], references: [id])
+  productId  Int
+  Product    Product @relation(fields: [productId], references: [id])
+}
+
+model Cart {
+  id         Int     @id @default(autoincrement())
+  totalPrice Int
+  quantity   Int
+  userId     Int
+  User       User    @relation(fields: [userId], references: [id])
+  productId  Int
+  Product    Product @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id           Int            @id @default(autoincrement())
+  enumCategory Category
+  productName  String
+  description  String?
+  price        Int            @default(0)
+  product      ProductImage[]
+  cart         Cart[]
+  orderItem    OrderItem[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  imageUrl  String
+  productId Int
+  Product   Product @relation(fields: [productId], references: [id])
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum Category {
+  CLEAN
+  FEED
+  DRINK
+}
