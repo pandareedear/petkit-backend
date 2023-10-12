@@ -29,7 +29,7 @@ model User {
 
 model Order {
   id            Int           @id @default(autoincrement())
-  totalPrice    Int
+  totalPrice    Decimal       @db.Decimal(10, 2)
   paymentStatus PaymentStatus
   paymentDate   DateTime?
   qrImageUrl    String
@@ -42,7 +42,7 @@ model Order {
 model OrderItem {
   id         Int     @id @default(autoincrement())
   quantity   Int
-  totalPrice Int
+  totalPrice Decimal @db.Decimal(10, 2)
   orderId    Int
   Order      Order   @relation(fields: [orderId], references: [id])
   productId  Int
@@ -51,7 +51,7 @@ model OrderItem {
 
 model Cart {
   id         Int     @id @default(autoincrement())
-  totalPrice Int
+  totalPrice Decimal @db.Decimal(10, 2)
   quantity   Int
   userId     Int
   User       User    @relation(fields: [userId], references: [id])
@@ -64,7 +64,7 @@ model Product {
   enumCategory Category
   productName  String
   description  String?
-  price        Int            @default(0)
+  price        Decimal        @db.Decimal(10, 2)
   product      ProductImage[]
   cart         Cart[]
   orderItem    OrderItem[]

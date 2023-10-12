@@ -11,7 +11,7 @@ POST /auth/login
 BODY email, password
 RESPONSE
 200 { accessToken: String, user: { id: Number, firstName: String } }
-400 { message: String }
+400 { message: String } // Bad Request
 500 { message: String }
 
 GET AUTHENTICATED USER
