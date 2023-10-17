@@ -17,7 +17,7 @@ model User {
   email     String  @unique
   password  String
   mobile    String? @unique
-  adddress  String?
+  address   String?
   city      String?
   province  String?
   country   String?
