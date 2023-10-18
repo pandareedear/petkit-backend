@@ -7,6 +7,7 @@ const errMiddleware = require("./middlewares/error");
 const rateLimitMilddleware = require("./middlewares/rate-limit");
 const authRoute = require("./routes/auth-route");
 const adminRoute = require("./routes/admin-route");
+const productRoute = require("./routes/product-route");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(morgan("dev"));
 app.use(rateLimitMilddleware);
 app.use(express.json());
 
+app.use("/", productRoute);
 app.use("/auth", authRoute);
 app.use("/admin", adminRoute);
 

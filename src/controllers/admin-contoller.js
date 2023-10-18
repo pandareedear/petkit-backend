@@ -9,7 +9,7 @@ exports.createProduct = async (req, res, next) => {
     console.log("req.body", req.body);
     const { value, error } = createProductSchema.validate(req.body);
     console.log("value", value);
-    console.log("error", error);
+
     if (error) {
       return next(error);
     }
@@ -23,8 +23,32 @@ exports.createProduct = async (req, res, next) => {
     }
 
     const product = await prisma.product.create({
-      data: value,
+      data: {
+        productName: value.productName,
+        description: value.description,
+        enumCategory: value.enumCategory,
+        price: value.price,
+      },
     });
+
+    const productImageDup = await prisma.productImage.findFirst({
+      where: {
+        productId: product.id,
+      },
+    });
+
+    if (productImageDup) {
+      return next(createError("Already add this product name", 400));
+    }
+    console.log(product.id);
+
+    const productImage = await prisma.productImage.create({
+      data: {
+        productId: product.id,
+        imageUrl: value.imageUrl,
+      },
+    });
+
     const payload = { productId: product.id };
     const accessToken = jwt.sign(
       payload,
@@ -34,9 +58,33 @@ exports.createProduct = async (req, res, next) => {
       }
     );
     // delete user.pasword;
-    res.status(201).json({ accessToken, product });
+    res.status(201).json({ accessToken, product, productImage });
   } catch (err) {
     console.log(err);
     next(err);
   }
+};
+
+exports.getProduct = async (req, res, next) => {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        productImage: {
+          select: {
+            productId: true,
+            imageUrl: true,
+          },
+        },
+      },
+    });
+    console.log(products);
+    res.status(200).json({ products });
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+};
+
+exports.getMe = (req, res) => {
+  res.status(200).json({ user: req.user });
 };
