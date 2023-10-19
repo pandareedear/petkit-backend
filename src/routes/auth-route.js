@@ -7,6 +7,11 @@ const router = express.Router();
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.patch("/address", authenticateMiddleware, authController.editAddress);
+// router.patch(
+//   "/address",
+//   authenticateMiddleware,
+//   authController.checkoutAddress
+// );
 router.post("/cart", authenticateMiddleware, cartController.addToCart);
 router.get("/cart", authenticateMiddleware, cartController.getCart);
 router.delete(
