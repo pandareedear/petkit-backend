@@ -84,78 +84,96 @@ exports.login = async (req, res, next) => {
 exports.editAddress = async (req, res, next) => {
   try {
     const { checkOut } = req.query;
-    // console.log(checkOut, "checkoutja");
-    // const { value, error } = addressSchema.validate(req.body);
-    // console.log("value", value);
-    // if (error) {
-    //   return next(error);
-    // }
-    // const mobileDup = await prisma.user.findFirst({
-    //   where: {
-    //     mobile: value.mobile,
-    //   },
-    // });
-    // if (mobileDup) {
-    //   return next(createError("This phone number is already used", 400));
-    // }
+    console.log(checkOut, "checkoutja");
+    const { value, error } = addressSchema.validate(req.body);
+    console.log("value", value);
+    if (error) {
+      return next(error);
+    }
+    const mobileDup = await prisma.user.findFirst({
+      where: {
+        mobile: value.mobile,
+      },
+    });
+    if (mobileDup) {
+      return next(createError("This phone number is already used", 400));
+    }
 
-    // const user = await prisma.user.update({
-    //   where: {
-    //     id: req.user.id,
-    //   },
-    //   data: {
-    //     firstName: value.firstName,
-    //     lastName: value.lastName,
-    //     mobile: value.mobile,
-    //     address: value.address,
-    //     city: value.city,
-    //     zipCode: value.zipCode,
-    //     country: value.country,
-    //     province: value.province,
-    //   },
-    // });
-    // const payload = { userId: user.id };
-    // const accessToken = jwt.sign(
-    //   payload,
-    //   process.env.JWT_SECRET_KEY || "dfwueyqiuhdjkbsajkbd",
-    //   {
-    //     expiresIn: process.env.JWT_EXPIRE,
-    //   }
-    // );
+    const user = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        firstName: value.firstName,
+        lastName: value.lastName,
+        mobile: value.mobile,
+        address: value.address,
+        city: value.city,
+        zipCode: value.zipCode,
+        country: value.country,
+        province: value.province,
+      },
+    });
+    const payload = { userId: user.id };
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET_KEY || "dfwueyqiuhdjkbsajkbd",
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      }
+    );
+    console.log(req.user.id);
+
+    let carts;
+    let totalPrice;
+    let order;
+    let orderItem;
+    let deleteCart;
 
     if (checkOut) {
-      const cart = await prisma.cart.findMany({
+      carts = await prisma.cart.findMany({
         where: {
           userId: +req.user.id,
         },
       });
 
-      const totalPrice = cart.reduce((acc, el) => {
-        acc += +el.totalPrice;
+      console.log(carts);
 
+      totalPrice = carts.reduce((acc, el) => {
+        acc += +el.totalPrice;
         return acc;
       }, 0);
 
       console.log("totalPrice", totalPrice);
-       const order = await prisma.order.create({
-          data: {
-            userId: req.user.id,
-            totalPrice: totalPrice,
-            qrImageUrl: ,
-          }
-        })
 
-        const orderItem = await prisma.orderItem.create({
-          data: {
-           quantity:   req.body.quantity,
-            totalPrice:  req.body.totalPrice,
-            orderId   :  order.id,
-            productId :  req.body.productId,
-
-          },
-        });
+      const order = await prisma.order.create({
+        data: {
+          userId: req.user.id,
+          totalPrice: totalPrice,
+        },
+      });
+      console.log("CART AI SUS", carts);
+      await Promise.all(
+        carts.map((cart) =>
+          prisma.orderItem.create({
+            data: {
+              quantity: cart.quantity,
+              totalPrice: cart.totalPrice,
+              orderId: order.id,
+              productId: order.userId,
+            },
+          })
+        )
+      );
+      // ใช้Promise.all เพราะว่าต้องครีเอต จากcart ลง orderitem ซึ่งมันมีของในcartมากกว่าหนึ่งอันเลยใช้ Promise.all
+      //[PROMISEPENDING,PROMISEPENDING] ต้องคลี่ด้วย promise.all([])
+      const deleteCart = await prisma.cart.deleteMany({
+        where: {
+          userId: req.user.id,
+        },
+      });
     }
-    res.status(201).json({ accessToken, user });
+    res.status(201).json({ user, carts, order, orderItem, deleteCart });
   } catch (err) {
     next(err);
   }

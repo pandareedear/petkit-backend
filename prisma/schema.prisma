@@ -32,7 +32,6 @@ model Order {
   totalPrice    Decimal       @db.Decimal(10, 2)
   paymentStatus PaymentStatus @default(PENDING)
   paymentDate   DateTime?
-  qrImageUrl    String
   slipImageUrl  String?
   userId        Int
   User          User?         @relation(fields: [userId], references: [id])
