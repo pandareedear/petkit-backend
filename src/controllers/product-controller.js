@@ -36,7 +36,7 @@ exports.getProductById = async (req, res, next) => {
       },
     });
     // console.log({ product });
-    res.status(200).json({ product });
+    res.status(200).json(product);
   } catch (err) {
     console.log(err);
     next(err);

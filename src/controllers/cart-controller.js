@@ -36,8 +36,8 @@ exports.addToCart = async (req, res, next) => {
           id: checkCart.id,
         },
         data: {
-          quantity: checkCart.quantity + req.body.quantity,
-          totalPrice: req.body.price * (checkCart.quantity + req.body.quantity),
+          quantity: req.body.quantity,
+          totalPrice: req.body.price * req.body.quantity,
         },
       });
     }
@@ -70,6 +70,21 @@ exports.getCart = async (req, res, next) => {
     res.status(200).json({ cart });
   } catch (err) {
     console.log(err);
+    next(err);
+  }
+};
+
+exports.removeCart = async (req, res, next) => {
+  const { cartId } = req.params;
+  console.log(cartId);
+  try {
+    const cart = await prisma.cart.deleteMany({
+      where: {
+        id: parseInt(cartId),
+      },
+    });
+    res.status(200).json({ cart });
+  } catch (err) {
     next(err);
   }
 };
