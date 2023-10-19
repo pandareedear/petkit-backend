@@ -18,6 +18,7 @@ exports.getProduct = async (req, res, next) => {
     next(err);
   }
 };
+
 exports.getProductById = async (req, res, next) => {
   const productId = +req.params.productId;
 
@@ -35,7 +36,7 @@ exports.getProductById = async (req, res, next) => {
       },
     });
     // console.log({ product });
-    res.status(200).json(product);
+    res.status(200).json({ product });
   } catch (err) {
     console.log(err);
     next(err);
