@@ -74,9 +74,8 @@ exports.getProduct = async (req, res, next) => {
   try {
     const products = await prisma.product.findMany({
       include: {
-        productImage: {
+        product: {
           select: {
-            productId: true,
             imageUrl: true,
           },
         },
@@ -86,6 +85,18 @@ exports.getProduct = async (req, res, next) => {
     res.status(200).json({ products });
   } catch (err) {
     console.log(err);
+    next(err);
+  }
+};
+
+exports.changeStatusOrder = async (req, res, next) => {
+  try {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: req.body.id,
+      },
+    });
+  } catch (err) {
     next(err);
   }
 };

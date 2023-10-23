@@ -39,4 +39,5 @@ router.get(
   authenticateMiddleware,
   authController.getOrderHistory
 );
+
 module.exports = router;

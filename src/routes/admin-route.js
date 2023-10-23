@@ -11,5 +11,12 @@ router.post(
   uploadMiddleware.single("imageUrl"),
   adminController.createProduct
 );
+router.get("/product", authenticateMiddleware, adminController.getProduct);
+
+// router.patch(
+//   "/order",
+//   authenticateMiddleware,
+//   adminController.changeStatusOrder
+// );
 
 module.exports = router;
