@@ -4,6 +4,7 @@ const cartController = require("../controllers/cart-controller");
 const authenticateMiddleware = require("../middlewares/authenticate");
 const router = express.Router();
 const uploadMiddleware = require("../middlewares/upload");
+const getOrderHistory = require("../controllers/auth-controller");
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
@@ -31,5 +32,11 @@ router.post(
   authenticateMiddleware,
   uploadMiddleware.single("slipImageUrl"),
   authController.uploadSlip
+);
+
+router.get(
+  "/account/order",
+  authenticateMiddleware,
+  authController.getOrderHistory
 );
 module.exports = router;

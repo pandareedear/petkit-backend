@@ -8,8 +8,8 @@ const router = express.Router();
 router.post(
   "/product",
   authenticateMiddleware,
-  adminController.createProduct,
-  uploadMiddleware.single("image")
+  uploadMiddleware.single("imageUrl"),
+  adminController.createProduct
 );
 
 module.exports = router;

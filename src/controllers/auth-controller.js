@@ -216,6 +216,21 @@ exports.uploadSlip = async (req, res, next) => {
   }
 };
 
+exports.getOrderHistory = async (req, res, next) => {
+  console.log(req.user.id, "userId");
+  try {
+    const order = await prisma.order.findMany({
+      where: {
+        userId: req.user.id,
+      },
+    });
+    console.log(order);
+    res.status(201).json({ order });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getMe = (req, res) => {
   res.status(200).json({ user: req.user });
 };

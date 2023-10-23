@@ -36,7 +36,6 @@ const createProductSchema = Joi.object({
   productName: Joi.string().required(),
   description: Joi.string(),
   price: Joi.number().required(),
-  imageUrl: Joi.required(),
 });
 
 exports.registerSchema = registerSchema;

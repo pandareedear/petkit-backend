@@ -3,16 +3,20 @@ const jwt = require("jsonwebtoken");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
 const { createProductSchema } = require("../validators/auth-validator");
+const { required } = require("joi");
+const { upload } = require("../utils/cloudinary-service");
 
 exports.createProduct = async (req, res, next) => {
+  console.log("req.body", req.body);
+  // console.dir(req.file.path);
   try {
-    console.log("req.body", req.body);
     const { value, error } = createProductSchema.validate(req.body);
     console.log("value", value);
 
     if (error) {
       return next(error);
     }
+
     const productDup = await prisma.product.findFirst({
       where: {
         productName: value.productName,
@@ -21,6 +25,7 @@ exports.createProduct = async (req, res, next) => {
     if (productDup) {
       return next(createError("Already add this product name", 400));
     }
+    console.log("testCreate");
 
     const product = await prisma.product.create({
       data: {
@@ -42,23 +47,23 @@ exports.createProduct = async (req, res, next) => {
     }
     console.log(product.id);
 
+    const imageUrl = await upload(req.file.path);
+    console.log(imageUrl);
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
     const productImage = await prisma.productImage.create({
       data: {
         productId: product.id,
-        imageUrl: value.imageUrl,
+        imageUrl: imageUrl,
       },
     });
 
-    const payload = { productId: product.id };
-    const accessToken = jwt.sign(
-      payload,
-      process.env.JWT_SECRET_KEY || "dfwueyqiuhdjkbsajkbd",
-      {
-        expiresIn: process.env.JWT_EXPIRE,
-      }
-    );
-    // delete user.pasword;
-    res.status(201).json({ accessToken, product, productImage });
+    res
+      .status(201)
+      .json({ msg: "create product successfully", product, productImage });
   } catch (err) {
     console.log(err);
     next(err);
