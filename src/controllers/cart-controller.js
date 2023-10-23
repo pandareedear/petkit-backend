@@ -88,3 +88,27 @@ exports.removeCart = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.changeCartQuantity = async (req, res, next) => {
+  console.log("req.body", req.body);
+  try {
+    const checkCartId = await prisma.cart.findFirst({
+      where: {
+        id: req.body.id,
+      },
+    });
+    console.log("---checkCartId----", checkCartId);
+    cart = await prisma.cart.update({
+      where: {
+        id: req.body.id,
+      },
+      data: {
+        quantity: req.body.quantity,
+        totalPrice: req.body.price * req.body.quantity,
+      },
+    });
+    res.status(201).json({ cart });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -8,6 +8,7 @@ const {
 } = require("../validators/auth-validator");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
+const { upload } = require("../utils/cloudinary-service");
 
 exports.register = async (req, res, next) => {
   try {
@@ -146,7 +147,7 @@ exports.editAddress = async (req, res, next) => {
 
       console.log("totalPrice", totalPrice);
 
-      const order = await prisma.order.create({
+      order = await prisma.order.create({
         data: {
           userId: req.user.id,
           totalPrice: totalPrice,
@@ -173,9 +174,45 @@ exports.editAddress = async (req, res, next) => {
         },
       });
     }
+    console.log("ORDER", order);
     res.status(201).json({ user, carts, order, orderItem, deleteCart });
   } catch (err) {
     next(err);
+  }
+};
+
+exports.uploadSlip = async (req, res, next) => {
+  const orderId = +req.params.orderId;
+  console.log(orderId, "orederId");
+  console.dir(req.file.path);
+  try {
+    console.log("testUpload");
+    // console.log("REQ FILE", req.file);
+
+    const slipImageUrl = await upload(req.file.path);
+    console.log(slipImageUrl);
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const uploadedSlip = await prisma.order.update({
+      where: {
+        id: parseInt(orderId),
+      },
+      data: {
+        slipImageUrl: slipImageUrl,
+        paymentDate: {
+          set: new Date(),
+        },
+      },
+    });
+
+    res
+      .status(201)
+      .json({ message: "test upload image successfully", uploadedSlip });
+  } catch (err) {
+    console.log(err);
   }
 };
 
