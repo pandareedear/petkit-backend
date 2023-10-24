@@ -4,6 +4,7 @@ const authenticateMiddleware = require("../middlewares/authenticate");
 const adminController = require("../controllers/admin-contoller");
 const uploadMiddleware = require("../middlewares/upload");
 const router = express.Router();
+const changeStatusOrder = require("../controllers/admin-contoller");
 
 router.post(
   "/product",
@@ -13,10 +14,15 @@ router.post(
 );
 router.get("/product", authenticateMiddleware, adminController.getProduct);
 
-// router.patch(
-//   "/order",
-//   authenticateMiddleware,
-//   adminController.changeStatusOrder
-// );
+router.patch(
+  "/order/:orderId",
+  authenticateMiddleware,
+  adminController.changeStatusOrder
+);
 
+router.delete(
+  "/order/:orderId",
+  authenticateMiddleware,
+  adminController.removeOrder
+);
 module.exports = router;

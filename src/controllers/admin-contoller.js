@@ -90,12 +90,49 @@ exports.getProduct = async (req, res, next) => {
 };
 
 exports.changeStatusOrder = async (req, res, next) => {
+  console.log("req.body", req.body);
+  // const id = req.params;
+  console.log(req.params);
+  const { orderId } = req.params;
+  const { paymentStatus } = req.body;
+  console.log(paymentStatus);
+  console.log(orderId);
   try {
-    const order = await prisma.order.findFirst({
+    const checkOrderId = await prisma.order.findFirst({
       where: {
-        id: req.body.id,
+        id: +orderId,
       },
     });
+    console.log(checkOrderId);
+    changeStatus = await prisma.order.update({
+      where: {
+        id: +orderId,
+      },
+      data: {
+        paymentStatus: req.body.paymentStatus,
+      },
+    });
+    res.status(200).json({ changeStatus });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.removeOrder = async (req, res, next) => {
+  const { orderId } = req.params;
+  console.log(orderId);
+  try {
+    const orderItem = await prisma.orderItem.deleteMany({
+      where: {
+        orderId: +orderId,
+      },
+    });
+    const order = await prisma.order.deleteMany({
+      where: {
+        id: +orderId,
+      },
+    });
+    res.status(200).json({ orderItem, order });
   } catch (err) {
     next(err);
   }

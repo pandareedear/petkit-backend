@@ -231,6 +231,24 @@ exports.getOrderHistory = async (req, res, next) => {
   }
 };
 
+exports.changeStatusOrder = async (req, res, next) => {
+  try {
+    const order = await prisma.order.findFirst({
+      where: {
+        id: req.body.id,
+      },
+    });
+    const changeStatus = await prisma.order.patch({
+      data: {
+        paymentStatus: req.body.paymentStatus,
+      },
+    });
+    res.status(200).json({ changeStatus });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.getMe = (req, res) => {
   res.status(200).json({ user: req.user });
 };
