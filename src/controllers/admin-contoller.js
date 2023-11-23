@@ -127,7 +127,7 @@ exports.removeOrder = async (req, res, next) => {
         orderId: +orderId,
       },
     });
-    const order = await prisma.order.deleteMany({
+    const order = await prisma.order.delete({
       where: {
         id: +orderId,
       },
@@ -140,4 +140,78 @@ exports.removeOrder = async (req, res, next) => {
 
 exports.getMe = (req, res) => {
   res.status(200).json({ user: req.user });
+};
+
+exports.removeProduct = async (req, res, next) => {
+  const { productId } = req.params;
+  console.log(productId);
+  try {
+    const productImage = await prisma.productImage.findFirst({
+      where: {
+        productId: +productId,
+      },
+    });
+    if (productImage) {
+      const deleteProductImage = await prisma.productImage.delete({
+        where: {
+          id: +productImage.id,
+        },
+      });
+      // return res.status(200).json({message:'Delete Complete'})
+    }
+
+    const product = await prisma.product.delete({
+      where: {
+        id: +productId,
+      },
+    });
+    console.log(product);
+    res.status(200).json({
+      msg: "delete product successfully",
+      product,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.editProduct = async (req, res, next) => {
+  try {
+    // console.log(req.body);
+    // console.log(req.file);
+    const { productId } = req.params;
+    console.log(productId);
+
+    const { value, error } = createProductSchema.validate(req.body);
+    console.log(value);
+    const product = await prisma.product.update({
+      where: {
+        id: +productId,
+      },
+      data: {
+        productName: value.productName,
+        description: value.description,
+        enumCategory: value.enumCategory,
+        price: value.price,
+      },
+    });
+    // console.log(product, "here");
+    // console.log(imageUrl);
+
+    if (req.file.path) {
+      const imageUrl = await upload(req.file.path);
+      const productImage = await prisma.productImage.updateMany({
+        data: {
+          imageUrl: imageUrl,
+        },
+        where: {
+          productId: product.id,
+        },
+      });
+      console.log(productImage);
+    }
+    res.status(200).json({ msg: "edit product successfully" });
+  } catch (err) {
+    next(err);
+  }
 };

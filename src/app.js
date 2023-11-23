@@ -8,6 +8,8 @@ const rateLimitMilddleware = require("./middlewares/rate-limit");
 const authRoute = require("./routes/auth-route");
 const adminRoute = require("./routes/admin-route");
 const productRoute = require("./routes/product-route");
+const authenticateMiddleware = require("./middlewares/authenticate");
+const isAdminMiddleware = require("./middlewares/isAdminMiddleware");
 
 const app = express();
 
@@ -18,7 +20,8 @@ app.use(express.json());
 
 app.use("/", productRoute);
 app.use("/auth", authRoute);
-app.use("/admin", adminRoute);
+
+app.use("/admin", authenticateMiddleware, isAdminMiddleware, adminRoute);
 
 app.use(notFoundMiddleware);
 app.use(errMiddleware);

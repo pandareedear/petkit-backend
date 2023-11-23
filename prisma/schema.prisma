@@ -61,7 +61,7 @@ model Cart {
 model Product {
   id           Int            @id @default(autoincrement())
   enumCategory Category
-  productName  String
+  productName  String         @unique
   description  String?
   price        Decimal        @db.Decimal(10, 2)
   product      ProductImage[]
@@ -73,7 +73,7 @@ model ProductImage {
   id        Int     @id @default(autoincrement())
   imageUrl  String
   productId Int
-  Product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 }
 
 enum PaymentStatus {

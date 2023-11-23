@@ -12,13 +12,12 @@ const { upload } = require("../utils/cloudinary-service");
 
 exports.register = async (req, res, next) => {
   try {
-    console.log("req.body", req.body);
+    // console.log("req.body", req.body);
     const { value, error } = registerSchema.validate(req.body);
-    console.log("value", value);
+    // console.log("value", value);
     if (error) {
       return next(error);
     }
-    value.password = await bcrypt.hash(value.password, 12);
     const emailDup = await prisma.user.findUnique({
       where: {
         email: value.email,
@@ -27,6 +26,7 @@ exports.register = async (req, res, next) => {
     if (emailDup) {
       return next(createError("email is already used", 400));
     }
+    value.password = await bcrypt.hash(value.password, 12);
 
     const user = await prisma.user.create({
       data: value,
@@ -99,7 +99,6 @@ exports.editAddress = async (req, res, next) => {
     if (mobileDup) {
       return next(createError("This phone number is already used", 400));
     }
-
     const user = await prisma.user.update({
       where: {
         id: req.user.id,
@@ -161,7 +160,7 @@ exports.editAddress = async (req, res, next) => {
               quantity: cart.quantity,
               totalPrice: cart.totalPrice,
               orderId: order.id,
-              productId: order.userId,
+              productId: cart.productId,
             },
           })
         )
@@ -224,26 +223,9 @@ exports.getOrderHistory = async (req, res, next) => {
         userId: req.user.id,
       },
     });
+
     console.log(order);
     res.status(201).json({ order });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.changeStatusOrder = async (req, res, next) => {
-  try {
-    const order = await prisma.order.findFirst({
-      where: {
-        id: req.body.id,
-      },
-    });
-    const changeStatus = await prisma.order.patch({
-      data: {
-        paymentStatus: req.body.paymentStatus,
-      },
-    });
-    res.status(200).json({ changeStatus });
   } catch (err) {
     next(err);
   }
